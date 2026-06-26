@@ -2,9 +2,7 @@ version: '3.8'
 
 services:
   frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
+    build: https://github.com/edwardmartin22/mc_whitelist.git#main:frontend
     ports:
       - "8080:80"
     networks:
@@ -13,16 +11,16 @@ services:
       - backend
 
   backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
+    build: https://github.com/edwardmartin22/mc_whitelist.git#main:backend
     environment:
       - RCON_HOST=${RCON_HOST:-localhost}
       - RCON_PORT=${RCON_PORT:-25575}
       - RCON_PASSWORD=${RCON_PASSWORD:-}
       - PORTAL_NAME=${PORTAL_NAME:-My Custom Server}
     volumes:
-      - ./backend/instructions.md:/app/instructions.md:ro
+      # Create an instructions.md file in the same folder as this compose file 
+      # to override the default instructions shown on the portal!
+      - ./instructions.md:/app/instructions.md:ro
     networks:
       - mc_net
 
