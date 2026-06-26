@@ -1,0 +1,61 @@
+@import "tailwindcss";
+
+:root {
+  --mc-stone: #7a7a7a;
+  --mc-dirt: #866043;
+  --mc-grass: #4e8036;
+  --mc-green: #39FF14;
+  --mc-dark: #1e1e1e;
+  --mc-obsidian: #141115;
+}
+
+body {
+  margin: 0;
+  display: block; /* Remove flex from body to let #root handle it */
+  min-width: 320px;
+  min-height: 100vh;
+  background-color: var(--mc-obsidian);
+  color: #fff;
+  font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
+  background-image: 
+    linear-gradient(rgba(20, 17, 21, 0.8), rgba(20, 17, 21, 0.9)),
+    url('https://www.transparenttextures.com/patterns/cubes.png');
+}
+
+#root {
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.markdown-body details {
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0.5rem;
+  margin-bottom: 0.5rem;
+  padding: 0.5rem 1rem;
+}
+
+.markdown-body summary {
+  cursor: pointer;
+  font-weight: 600;
+  outline: none;
+}
+
+.markdown-body p {
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.markdown-body ol, .markdown-body ul {
+  padding-left: 1.5rem;
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.markdown-body li {
+  margin-bottom: 0.25rem;
+}

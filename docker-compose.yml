@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "8080:80"
+    networks:
+      - mc_net
+    depends_on:
+      - backend
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    environment:
+      - RCON_HOST=${RCON_HOST:-localhost}
+      - RCON_PORT=${RCON_PORT:-25575}
+      - RCON_PASSWORD=${RCON_PASSWORD:-}
+      - PORTAL_NAME=${PORTAL_NAME:-My Custom Server}
+    volumes:
+      - ./backend/instructions.md:/app/instructions.md:ro
+    networks:
+      - mc_net
+
+networks:
+  mc_net:
+    driver: bridge
