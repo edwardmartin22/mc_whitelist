@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   frontend:
-    build: https://github.com/edwardmartin22/mc_whitelist.git#main:frontend
+    image: ghcr.io/edwardmartin22/mc_whitelist-frontend:main
     ports:
       - "8080:80"
     networks:
@@ -11,7 +11,7 @@ services:
       - backend
 
   backend:
-    build: https://github.com/edwardmartin22/mc_whitelist.git#main:backend
+    image: ghcr.io/edwardmartin22/mc_whitelist-backend:main
     environment:
       - RCON_HOST=${RCON_HOST:-localhost}
       - RCON_PORT=${RCON_PORT:-25575}
