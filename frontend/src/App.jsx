@@ -84,7 +84,7 @@ function App() {
                 id="username"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                placeholder="Notch"
+                placeholder="PlayerName"
                 required
                 className="w-full px-4 py-3 bg-black/40 border border-[#7a7a7a] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#4e8036] focus:border-transparent text-white placeholder-gray-500 transition-all duration-300"
               />
