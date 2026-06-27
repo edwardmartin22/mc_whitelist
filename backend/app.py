@@ -12,10 +12,11 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Configuration
-RCON_HOST = os.environ.get('RCON_HOST', 'localhost')
-RCON_PORT = int(os.environ.get('RCON_PORT', '25575'))
-RCON_PASSWORD = os.environ.get('RCON_PASSWORD', '')
-PORTAL_NAME = os.environ.get('PORTAL_NAME', 'MINECRAFT SERVER')
+RCON_HOST = os.environ.get('RCON_HOST') or 'localhost'
+rcon_port_env = os.environ.get('RCON_PORT')
+RCON_PORT = int(rcon_port_env) if rcon_port_env and rcon_port_env.isdigit() else 25575
+RCON_PASSWORD = os.environ.get('RCON_PASSWORD') or ''
+PORTAL_NAME = os.environ.get('PORTAL_NAME') or 'MINECRAFT SERVER'
 
 # --- RATE LIMITING ---
 # IP -> { 'requests': [timestamps], 'strikes': int, 'locked_until': float }
@@ -82,8 +83,9 @@ def exponential_backoff(f):
 def get_config():
     instructions = ""
     try:
-        with open('instructions.md', 'r') as f:
-            instructions = f.read()
+        if os.path.isfile('instructions.md'):
+            with open('instructions.md', 'r') as f:
+                instructions = f.read()
     except Exception as e:
         logger.error(f"Could not read instructions.md: {e}")
         
