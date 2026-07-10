@@ -123,36 +123,50 @@ def whitelist_add():
         logger.info(f"Attempting to whitelist '{username}'")
         with MCRcon(RCON_HOST, RCON_PASSWORD, port=RCON_PORT) as mcr:
             
-            # Wrap the username in quotes in case it has a space
-            response = mcr.command(f'whitelist add "{username}"')
-            logger.info(f"RCON Response for {username}: {response}")
+            has_space = ' ' in username
             
-            # Catch the Java failure
-            if "Couldn't find profile" in response or "does not exist" in response:
+            # SCENARIO A: Name has a space (Must be Bedrock)
+            if has_space:
+                if not ENABLE_FLOODGATE:
+                    return jsonify({"error": "Bad Request", "message": "Spaces are not allowed in Java usernames."}), 400
                 
-                # Path A: Floodgate Fallback
-                if ENABLE_FLOODGATE:
-                    logger.info("Java profile not found. Attempting Floodgate fallback...")
-                    fallback_response = mcr.command(f'fwhitelist add "{username}"')
-                    logger.info(f"RCON Response for fwhitelist: {fallback_response}")
+                logger.info("Username contains a space. Bypassing Java and using Floodgate directly.")
+                fallback_response = mcr.command(f'fwhitelist add "{username}"')
+                logger.info(f"RCON Response for fwhitelist: {fallback_response}")
+                
+                if "does not exist" in fallback_response or "Usage" in fallback_response:
+                    return jsonify({"error": "Not Found", "message": f"Could not find Bedrock player: {username}"}), 404
+
+            # SCENARIO B: No space (Could be Java or Bedrock)
+            else:
+                # Java whitelist (NO QUOTES)
+                response = mcr.command(f'whitelist add {username}')
+                logger.info(f"RCON Response for {username}: {response}")
+                
+                # Catch the Java failure
+                if "Couldn't find profile" in response or "does not exist" in response or "Incorrect argument" in response:
                     
-                    if "does not exist" in fallback_response or "Usage" in fallback_response:
-                        return jsonify({"error": "Not Found", "message": f"Could not find Bedrock or Java player: {username}"}), 404
-                
-                # Path B: Legacy Bedrock Prefix Fallback
-                elif ENABLE_BEDROCK_PREFIX:
-                    logger.info("Java profile not found. Attempting Bedrock prefix fallback...")
-                    prefix_response = mcr.command(f'whitelist add ".{username}"')
-                    logger.info(f"RCON Response for .{username}: {prefix_response}")
+                    if ENABLE_FLOODGATE:
+                        logger.info("Java profile not found. Attempting Floodgate fallback...")
+                        # Floodgate fallback (WITH QUOTES just in case)
+                        fallback_response = mcr.command(f'fwhitelist add "{username}"')
+                        logger.info(f"RCON Response for fwhitelist: {fallback_response}")
+                        
+                        if "does not exist" in fallback_response or "Usage" in fallback_response:
+                            return jsonify({"error": "Not Found", "message": f"Could not find Bedrock or Java player: {username}"}), 404
                     
-                    if "Couldn't find profile" in prefix_response or "does not exist" in prefix_response:
-                        return jsonify({"error": "Not Found", "message": f"Could not find player: {username}"}), 404
-                
-                # Path C: No fallbacks enabled, return 404 immediately
-                else:
-                    return jsonify({"error": "Not Found", "message": f"Could not find Java player: {username}"}), 404
+                    elif ENABLE_BEDROCK_PREFIX:
+                        logger.info("Java profile not found. Attempting Bedrock prefix fallback...")
+                        prefix_response = mcr.command(f'whitelist add .{username}')
+                        logger.info(f"RCON Response for .{username}: {prefix_response}")
+                        
+                        if "Couldn't find profile" in prefix_response or "does not exist" in prefix_response:
+                            return jsonify({"error": "Not Found", "message": f"Could not find player: {username}"}), 404
+                    
+                    else:
+                        return jsonify({"error": "Not Found", "message": f"Could not find Java player: {username}"}), 404
             
-            # If we get here, one of the whitelist commands succeeded
+            # If we get here, the whitelist command succeeded
             return jsonify({
                 "success": True, 
                 "message": f"Successfully whitelisted {username}."
@@ -161,6 +175,6 @@ def whitelist_add():
     except Exception as e:
         logger.error(f"RCON Connection failed: {e}")
         return jsonify({"error": "Server Error", "message": "Failed to connect to Minecraft server."}), 500
-
+        
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
