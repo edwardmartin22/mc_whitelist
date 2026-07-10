@@ -17,6 +17,8 @@ rcon_port_env = os.environ.get('RCON_PORT')
 RCON_PORT = int(rcon_port_env) if rcon_port_env and rcon_port_env.isdigit() else 25575
 RCON_PASSWORD = os.environ.get('RCON_PASSWORD') or ''
 PORTAL_NAME = os.environ.get('PORTAL_NAME') or 'MINECRAFT SERVER'
+ENABLE_BEDROCK_PREFIX = os.environ.get('ENABLE_BEDROCK_PREFIX', 'false').lower() == 'true'
+ENABLE_FLOODGATE = os.environ.get('ENABLE_FLOODGATE', 'false').lower() == 'true'
 
 # --- RATE LIMITING ---
 # IP -> { 'requests': [timestamps], 'strikes': int, 'locked_until': float }
@@ -120,17 +122,17 @@ def whitelist_add():
             response1 = mcr.command(f"whitelist add {username}")
             logger.info(f"RCON Response for {username}: {response1}")
             
-            # Standard command (might fail if online-mode=true and looking up Mojang)
-            response2 = mcr.command(f"whitelist add .{username}")
-            logger.info(f"RCON Response for .{username}: {response2}")
+            if ENABLE_BEDROCK_PREFIX:
+                response2 = mcr.command(f"whitelist add .{username}")
+                logger.info(f"RCON Response for .{username}: {response2}")
             
-            # If they are using floodgate, they might need fwhitelist instead
-            response3 = mcr.command(f"fwhitelist add {username}")
-            logger.info(f"RCON Response for fwhitelist: {response3}")
+            if ENABLE_FLOODGATE:
+                response3 = mcr.command(f"fwhitelist add {username}")
+                logger.info(f"RCON Response for fwhitelist: {response3}")
             
             return jsonify({
                 "success": True, 
-                "message": f"Successfully whitelisted both {username} and .{username} for crossplay."
+                "message": f"Successfully whitelisted {username}."
             }), 200
             
     except Exception as e:
