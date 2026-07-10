@@ -15,7 +15,10 @@ function App() {
     fetch('/api/config')
       .then(res => res.json())
       .then(data => {
-        if (data.portal_name) setPortalName(data.portal_name)
+        if (data.portal_name) {
+          setPortalName(data.portal_name)
+          document.title = data.portal_name
+        }
         if (data.instructions) setInstructions(data.instructions)
       })
       .catch(err => console.error("Failed to load config:", err))

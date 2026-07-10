@@ -120,8 +120,13 @@ def whitelist_add():
             response1 = mcr.command(f"whitelist add {username}")
             logger.info(f"RCON Response for {username}: {response1}")
             
-            response2 = mcr.command(f"whitelist add .{username}")
+            # Wrap the Bedrock username in quotes so the Minecraft server parses the period correctly
+            response2 = mcr.command(f'whitelist add ".{username}"')
             logger.info(f"RCON Response for .{username}: {response2}")
+            
+            # If they are using floodgate, they might need fwhitelist instead
+            response3 = mcr.command(f"fwhitelist add {username}")
+            logger.info(f"RCON Response for fwhitelist: {response3}")
             
             return jsonify({
                 "success": True, 
